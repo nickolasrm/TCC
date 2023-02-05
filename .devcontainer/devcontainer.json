@@ -9,7 +9,6 @@
 		"ghcr.io/devcontainers/features/conda:1": {},
 		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {},
 		"ghcr.io/devcontainers-contrib/features/curl-apt-get:1": {},
-		"ghcr.io/devcontainers-contrib/features/poetry:2": {},
 		"ghcr.io/devcontainers-contrib/features/pre-commit:2": {},
 		"ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {},
 		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
@@ -22,7 +21,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sh .devcontainer/postInstallScript.sh",
+	"postCreateCommand": "bash .devcontainer/postInstallScript.sh && make install-dev",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
