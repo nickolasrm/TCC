@@ -72,8 +72,8 @@ class KBitDiscretization(Discretization):
 
     def call(self, data: tf.Tensor) -> tf.Tensor:
         """Converts a floating point number to a bit vector."""
-        outputs = super().call(data)
-        return tf.where(outputs == 0, -1.0, 1.0)
+        outputs = center_at_zero(super().call(data))
+        return outputs
 
     def get_config(self) -> dict:
         """Init parameters for cloning the object."""
