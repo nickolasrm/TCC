@@ -1,0 +1,10 @@
+abc:
+  def: 3
+  xyz:
+    _target_: builtins.list
+    _args_:
+      -
+        - 10
+        - _target_: keras.layers.Dense
+          units: 8
+        - c
