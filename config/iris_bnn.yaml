@@ -1,0 +1,32 @@
+layers:
+  - _target_: bnn_analysis.base.preprocess.KBitDiscretization
+    precision: 4
+  - _target_: larq.layers.QuantDense
+    units: 8
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 8
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 8
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 3
+    activation: softmax
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+compile:
+  optimizer: adam
+  loss: categorical_crossentropy
+  metrics:
+    - accuracy
+fit:
+  epochs: 1000
+  batch_size: 32
