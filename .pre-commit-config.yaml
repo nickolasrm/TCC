@@ -23,13 +23,13 @@ repos:
         args:
           - "--profile=black"
   - repo: https://github.com/pycqa/pylint
-    rev: pylint-2.6.0
+    rev: v2.8.2
     hooks:
       - id: pylint
         name: "Preventing technical debt (Pylint)"
         types: [python]
         args:
-          - "--disable=E0401,R0801,C0411"
+          - "--disable=E0401,R0801,C0411,R0903"
           - "--good-names=i,j,k,ex,Run,_,df,ax,fig,plt,x,y,f"
           - "--max-line-length=88"
   - repo: https://github.com/pycqa/flake8
