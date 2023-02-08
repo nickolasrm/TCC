@@ -15,6 +15,10 @@ pandas = "^1.5.3"
 seaborn = "^0.12.2"
 tensorflow = "^2.11.0"
 pygad = "^2.18.1"
+larq = "^0.13.0"
+datasets = "^2.9.0"
+scikit-learn = "^1.2.1"
+wandb = "^0.13.9"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "^3.5.3"

@@ -277,6 +277,13 @@ TSWLatexianTemp*
 
 # Python
 *.pyc
+.mypy_cache
+__pycache__
 
 # VSCode
 .vscode
+
+# Wandb
+wandb
+outputs
+logs
