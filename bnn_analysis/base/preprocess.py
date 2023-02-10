@@ -64,16 +64,23 @@ class KBitDiscretization(Discretization):
 
         """
         self.precision = precision
-        interval = (1 - (-1)) / 2**precision
+        interval = (1 - 0) / 2**precision
         super().__init__(
-            bin_boundaries=np.arange(-1, 1 + interval, interval),
-            output_mode="multi_hot",
+            bin_boundaries=np.arange(0, 1 + interval, interval).tolist(),
+            output_mode="int",
         )
 
     def call(self, data: tf.Tensor) -> tf.Tensor:
         """Converts a floating point number to a bit vector."""
-        outputs = center_at_zero(super().call(data))
-        return outputs
+        labels = super().call(tf.abs(data)) - 1
+        one_hot = tf.one_hot(labels, depth=len(self.bin_boundaries))
+        rank2_shape = [
+            dim or -1 for dim in [*one_hot.shape[:-2], np.prod(one_hot.shape[-2:])]
+        ]
+        one_hot = tf.reshape(one_hot, rank2_shape)
+        signs = tf.where(data < 0, 1.0, 0.0)
+        result = center_at_zero(tf.concat([signs, one_hot], axis=1))
+        return result
 
     def get_config(self) -> dict:
         """Init parameters for cloning the object."""
