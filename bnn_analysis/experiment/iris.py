@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 from sklearn.model_selection import train_test_split
 from wandb.keras import WandbMetricsLogger  # pylint: disable=no-name-in-module
 
-from bnn_analysis.base.experiment import experiment
+from bnn_analysis.base.experiment import Metrics, experiment
 from bnn_analysis.base.supervised import HuggingFaceDataSet, train
 
 
@@ -23,13 +23,13 @@ class IrisDataSet(HuggingFaceDataSet):
 
 
 @experiment
-def iris(cfg: DictConfig):
+def iris(cfg: DictConfig) -> Metrics:
     """Train a model on the Iris dataset."""
     layers = cfg.layers
     compile = cfg.compile  # pylint: disable=redefined-builtin
     fit = cfg.fit
     fit["callbacks"] = [WandbMetricsLogger()]
-    train("iris", IrisDataSet(), layers, compile, fit)
+    return train(IrisDataSet(), layers, compile, fit, "classification")
 
 
 if __name__ == "__main__":

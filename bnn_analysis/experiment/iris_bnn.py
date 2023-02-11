@@ -3,9 +3,9 @@ from omegaconf import DictConfig
 from sklearn.preprocessing import MinMaxScaler
 from wandb.keras import WandbMetricsLogger  # pylint: disable=no-name-in-module
 
-from bnn_analysis.base.experiment import experiment
+from bnn_analysis.base.experiment import Metrics, experiment
 from bnn_analysis.base.supervised import train
-from bnn_analysis.supervised.iris import IrisDataSet
+from bnn_analysis.experiment.iris import IrisDataSet
 
 
 class ScaledIrisDataSet(IrisDataSet):
@@ -20,13 +20,13 @@ class ScaledIrisDataSet(IrisDataSet):
 
 
 @experiment
-def iris_bnn(cfg: DictConfig):
+def iris_bnn(cfg: DictConfig) -> Metrics:
     """Train a BNN model on the MinMax Scaled Iris dataset."""
     layers = cfg.layers
     compile = cfg.compile  # pylint: disable=redefined-builtin
     fit = cfg.fit
     fit["callbacks"] = [WandbMetricsLogger()]
-    train("iris-bnn", ScaledIrisDataSet(), layers, compile, fit)
+    return train(ScaledIrisDataSet(), layers, compile, fit, "classification")
 
 
 if __name__ == "__main__":
