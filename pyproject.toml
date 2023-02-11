@@ -19,6 +19,8 @@ larq = "^0.13.0"
 datasets = "^2.9.0"
 scikit-learn = "^1.2.1"
 wandb = "^0.13.9"
+click = "^8.1.3"
+keras = "^2.11.0"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "^3.5.3"

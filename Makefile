@@ -34,16 +34,3 @@ lint:  ## Run linters
 lint-all:  ## Run linters on all files
 	@echo "Running linters on all files"
 	poetry run pre-commit run --all-files
-
-run:  ## Run a specified experiment e.g. make run experiment=supervised/iris
-	@echo "Running experiment"
-	@if [ -z "$(experiment)" ]; then echo "No experiment specified"; exit 1; fi;
-	poetry run python ./$(PACKAGE)/$(experiment).py; \
-
-run3:  ## Run a specified experiment 3 times e.g. make run3 experiment=supervised/iris
-	@echo "Running experiment 1"
-	make run experiment=$(experiment)
-	@echo "Running experiment 2"
-	make run experiment=$(experiment)
-	@echo "Running experiment 3"
-	make run experiment=$(experiment)
