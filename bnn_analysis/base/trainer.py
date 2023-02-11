@@ -10,10 +10,9 @@ from keras.layers import Input, Layer
 class Trainer(ABC):
     """Base class for neural network trainers."""
 
-    def __init__(self, experiment: str) -> None:
+    def __init__(self) -> None:
         """Initialize the class."""
         self._model: t.Optional[Model] = None
-        self._experiment = experiment
 
     @property
     @abstractmethod
@@ -52,11 +51,9 @@ class Trainer(ABC):
             return self._model
         raise AttributeError("Model not built yet.")
 
-    @property
-    def experiment(self) -> str:
-        """Return the experiment name."""
-        return self._experiment
-
     @abstractmethod
     def fit(self) -> History:
         """Train the neural network."""
+
+    def evaluate(self) -> t.Optional[t.Dict[str, t.Any]]:
+        """Evaluate the neural network."""
