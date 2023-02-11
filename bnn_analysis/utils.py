@@ -4,6 +4,7 @@ import logging
 import typing as t
 from functools import lru_cache
 
+import flatten_dict as fd
 import pandas as pd
 
 Pandas = t.TypeVar("Pandas", pd.DataFrame, pd.Series)
@@ -58,3 +59,8 @@ def split_pandas(
 def md5(string: str) -> str:
     """Return the md5 hash of a string."""
     return hashlib.md5(string.encode("utf-8")).hexdigest()
+
+
+def flatten_dict(dictionary: dict) -> dict:
+    """Flatten a dictionary using dots."""
+    return fd.flatten(dictionary, reducer="dot")
