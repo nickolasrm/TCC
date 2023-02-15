@@ -1,0 +1,2 @@
+defaults:
+  - experiment: housing_bnn/2bit4x4x4x4poly_lr

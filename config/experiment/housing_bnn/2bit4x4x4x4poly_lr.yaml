@@ -1,0 +1,46 @@
+name: 2bit4x4x4x4poly_lr
+layers:
+  - _target_: bnn_analysis.base.preprocess.KBitDiscretization
+    precision: 2
+  - _target_: larq.layers.QuantDense
+    units: 4
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 4
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 4
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 4
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+  - _target_: larq.layers.QuantDense
+    units: 1
+    input_quantizer: ste_sign
+    kernel_quantizer: ste_sign
+    kernel_constraint: weight_clip
+    activation: linear
+compile:
+  optimizer:
+    _target_: keras.optimizers.Adam
+    learning_rate:
+      _target_: keras.optimizers.schedules.learning_rate_schedule.PolynomialDecay
+      initial_learning_rate: 0.01
+      decay_steps: 2000
+      power: 0.25
+      end_learning_rate: 0.001
+  loss: mse
+  metrics:
+    - mape
+    - mae
+fit:
+  epochs: 500
+  batch_size: 32

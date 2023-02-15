@@ -1,0 +1,26 @@
+name: 8x8x8x8
+layers:
+  - _target_: keras.layers.Dense
+    units: 8
+    activation: relu
+  - _target_: keras.layers.Dense
+    units: 8
+    activation: relu
+  - _target_: keras.layers.Dense
+    units: 8
+    activation: relu
+  - _target_: keras.layers.Dense
+    units: 8
+    activation: relu
+  - _target_: keras.layers.Dense
+    units: 1
+    activation: linear
+compile:
+  optimizer: adam
+  loss: mse
+  metrics:
+    - mape
+    - mae
+fit:
+  epochs: 400
+  batch_size: 32
