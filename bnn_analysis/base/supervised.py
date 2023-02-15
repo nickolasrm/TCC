@@ -20,6 +20,26 @@ class SupervisedDataSet:
     x_test: np.ndarray
     y_test: np.ndarray
 
+    @property
+    def x_shape(self) -> t.Tuple[int, ...]:
+        """Return the shape of the input data."""
+        return self.x_train.shape
+
+    @property
+    def y_shape(self) -> t.Tuple[int, ...]:
+        """Return the shape of the output data."""
+        return self.y_train.shape
+
+    def map_x(self, func: t.Callable[[np.ndarray], np.ndarray]) -> None:
+        """Apply a function to the input data."""
+        self.x_train = func(self.x_train)
+        self.x_test = func(self.x_test)
+
+    def map_y(self, func: t.Callable[[np.ndarray], np.ndarray]) -> None:
+        """Apply a function to the output data."""
+        self.y_train = func(self.y_train)
+        self.y_test = func(self.y_test)
+
 
 class HuggingFaceDataSet(SupervisedDataSet):
     """A dataset for supervised learning using HuggingFace datasets."""
@@ -69,7 +89,7 @@ class SupervisedTrainer(Trainer):
     @property
     def input_shape(self) -> t.Tuple[int, ...]:
         """Return the input shape of the dataset."""
-        shape = self.dataset.x_train.shape
+        shape = self.dataset.x_shape
         return shape[1:]
 
     def fit(self, **kwargs):

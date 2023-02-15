@@ -1,11 +1,9 @@
 """Train a traditional neural network on the Iris dataset."""
 import pandas as pd
-from omegaconf import DictConfig
 from sklearn.model_selection import train_test_split
-from wandb.keras import WandbMetricsLogger  # pylint: disable=no-name-in-module
 
-from bnn_analysis.base.experiment import Metrics, experiment
-from bnn_analysis.base.supervised import HuggingFaceDataSet, train
+from bnn_analysis.base.supervised import HuggingFaceDataSet
+from bnn_analysis.experiment.supervised import supervised_experiment
 
 
 class IrisDataSet(HuggingFaceDataSet):
@@ -22,15 +20,7 @@ class IrisDataSet(HuggingFaceDataSet):
         super().__init__(x_train, y_train, x_test, y_test)
 
 
-@experiment
-def iris(cfg: DictConfig) -> Metrics:
-    """Train a model on the Iris dataset."""
-    layers = cfg.layers
-    compile = cfg.compile  # pylint: disable=redefined-builtin
-    fit = cfg.fit
-    fit["callbacks"] = [WandbMetricsLogger()]
-    return train(IrisDataSet(), layers, compile, fit, "classification")
-
+iris = supervised_experiment("iris", IrisDataSet(), "classification")
 
 if __name__ == "__main__":
     iris()  # pylint: disable=no-value-for-parameter
