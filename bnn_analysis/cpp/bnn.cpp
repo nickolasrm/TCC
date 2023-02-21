@@ -263,6 +263,6 @@ int main(int argc, char **argv)
     t = clock();
     BitArray *output = bnn->feed_forward(input_arr);
     t = clock() - t;
-    int time_taken = 1e6 * ((double)t) / CLOCKS_PER_SEC; // in seconds
-    printf("%d", time_taken);
+    double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
+    printf("%lf", time_taken);
 }
