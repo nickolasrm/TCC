@@ -287,3 +287,8 @@ __pycache__
 wandb
 outputs
 logs
+
+bnn
+nn
+*.prof
+.ipynb_checkpoints
