@@ -8,6 +8,7 @@
 ## -------------------------------
 
 PACKAGE=bnn_analysis
+FLAGS=-O3 -march=tigerlake
 
 help:  ## Show this help
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
@@ -15,7 +16,7 @@ help:  ## Show this help
 compile:  ## Compile cpp files
 	@echo "Compiling cpp files"
 	for binary in "bnn" "nn"; do \
-		g++ "$(PACKAGE)/cpp/$${binary}.cpp" -O0 -o "$(PACKAGE)/cpp/$${binary}"; \
+		g++ "$(PACKAGE)/cpp/$${binary}.cpp" $(FLAGS) -o "$(PACKAGE)/cpp/$${binary}"; \
 	done;
 
 install:  ## Install package for development
@@ -44,11 +45,19 @@ list:
 
 run:
 	@echo "Running an experiment"
-	poetry run python -m bnn_analysis run $(experiment) --variant=$(variant)
+	if [ -z "$(variant)" ]; then \
+		poetry run python -m bnn_analysis run $(experiment); \
+	else \
+		poetry run python -m bnn_analysis run $(experiment) --variant=$(variant); \
+	fi;
 
 run5:
 	@echo "Running an experiment"
-	poetry run python -m bnn_analysis run $(experiment) --repeat=5 --variant=$(variant) 
+	if [ -z "$(variant)" ]; then \
+		poetry run python -m bnn_analysis run $(experiment) --repeat=5; \
+	else \
+		poetry run python -m bnn_analysis run $(experiment) --repeat=5 --variant=$(variant); \
+	fi;
 
 jupyter:
 	@echo "Running jupyter"
