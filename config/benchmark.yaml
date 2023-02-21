@@ -1,0 +1,58 @@
+experiment:
+  name: benchmark
+  cases:
+    mnist:
+      inputs: 784
+      units:
+        - 512
+        - 10
+    housing:
+      inputs: 13
+      units:
+        - 100
+        - 100
+        - 1
+    iris-8:
+      inputs: 4
+      units:
+        - 8
+        - 8
+        - 8
+        - 3
+    iris-4:
+      inputs: 4
+      units:
+        - 4
+        - 4
+        - 4
+        - 3
+    mnist-128:
+      inputs: 784
+      units:
+        - 128
+        - 10
+    many-inputs:
+      inputs: 1024
+      units:
+        - 32
+    many-layers:
+      inputs: 10
+      units:
+        - 32
+        - 32
+        - 32
+        - 32
+        - 32
+    many-units:
+      inputs: 10
+      units:
+        - 1024
+        - 1024
+    all-together:
+      inputs: 1024
+      units:
+        - 1024
+        - 1024
+        - 1024
+        - 1024
+        - 1024

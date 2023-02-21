@@ -64,3 +64,8 @@ def md5(string: str) -> str:
 def flatten_dict(dictionary: dict) -> dict:
     """Flatten a dictionary using dots."""
     return fd.flatten(dictionary, reducer="dot")
+
+
+def prefix_dict(dictionary: t.Dict[str, t.Any], *prefix: str) -> t.Dict[str, t.Any]:
+    """Prefix a dictionary."""
+    return {".".join([*prefix, key]): value for key, value in dictionary.items()}
