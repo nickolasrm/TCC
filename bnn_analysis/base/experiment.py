@@ -5,11 +5,12 @@ from functools import wraps
 
 import hydra
 import hydra.utils
+import pandas as pd
 from omegaconf import DictConfig, OmegaConf
 
 import wandb
-from bnn_analysis import CONFIG_PATH, PROJECT
-from bnn_analysis.utils import flatten_dict, md5
+from bnn_analysis import CONFIG_PATH, PACKAGE
+from bnn_analysis.utils import md5
 
 Metrics = t.Optional[t.Dict[str, t.Any]]
 ExperimentFunc = t.Callable[[DictConfig], Metrics]
@@ -47,7 +48,7 @@ def _configure_wandb(group: str, config: DictConfig, notes: t.Optional[str] = No
     now = datetime.now().isoformat()
     config_md5 = md5(str(config))  # identifies the config
     wandb.init(  # pylint: disable=no-member
-        project=PROJECT,
+        project=PACKAGE,
         group=group,
         name=f"{name}-{now}",
         config=t.cast(t.Dict, OmegaConf.to_container(config)),
@@ -68,8 +69,12 @@ def _stop_wandb():
 
 def _log_agg_metrics(agg_metrics: t.Optional[t.Dict[str, t.Any]]):
     """Log a dictionary to wandb."""
-    if agg_metrics is not None:
-        wandb.log(flatten_dict(agg_metrics))  # pylint: disable=no-member
+    if isinstance(agg_metrics, dict):
+        wandb.log(agg_metrics)  # pylint: disable=no-member
+    elif isinstance(agg_metrics, pd.DataFrame):
+        wandb.log(  # pylint: disable=no-member
+            {"table": wandb.Table(dataframe=agg_metrics)}  # pylint: disable=no-member
+        )
 
 
 def experiment(func: ExperimentFunc) -> MainFunc:
