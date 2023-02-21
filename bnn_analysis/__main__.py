@@ -5,7 +5,7 @@ import sys
 
 import click
 
-from bnn_analysis import CONFIG_PATH, PROJECT
+from bnn_analysis import CONFIG_PATH, PACKAGE
 
 
 def get_name(experiment: str) -> str:
@@ -39,7 +39,7 @@ def list():  # pylint: disable=redefined-builtin
 @click.option("--repeat", default=1)
 def run(experiment: str, variant: str, repeat: int):
     """Run an experiment."""
-    command = [sys.executable, f"{PROJECT}/experiment/{experiment}.py"]
+    command = [sys.executable, f"{PACKAGE}/experiment/{experiment}.py"]
     if variant != "default":
         command.append(f"experiment={get_name(experiment)}/{variant}")
 

@@ -1,53 +1,12 @@
 """Preprocessing layers for the BNNs."""
-import typing as t
-
 import numpy as np
 import tensorflow as tf
-from keras.layers import Discretization, Layer, Normalization
-
-from bnn_analysis.base.activations import center_at_zero, sign
+from keras.layers import Discretization
 
 
-class BinarizedNormalization(Normalization):  # pylint: disable=too-few-public-methods
-    """A normalization layer with binarized outputs between -1 and 1."""
-
-    def call(self, *args, **kwargs):
-        """Binarizes the output of the normalization layer."""
-        outputs = super().__call__(*args, **kwargs)
-        return sign(center_at_zero(outputs))
-
-
-class MinMaxNormalization(Layer):  # pylint: disable=too-few-public-methods
-    """A normalization layer that uses the min and max values to scale the data."""
-
-    def build(self, input_shape: tf.TensorShape):
-        """Add weights to the layer."""
-        super().build(input_shape)
-        self.max = self.add_weight(  # pylint: disable=attribute-defined-outside-init
-            name="max",
-            shape=input_shape,
-            dtype=self.compute_dtype,
-            initializer="zeros",
-            trainable=False,
-        )
-        self.min = self.add_weight(  # pylint: disable=attribute-defined-outside-init
-            name="min",
-            shape=input_shape,
-            dtype=self.compute_dtype,
-            initializer="zeros",
-            trainable=False,
-        )
-
-    def adapt(self, data: t.Any):
-        """Updates the min and max values."""
-        self.build(tf.TensorShape((data.shape[1],)))
-        self.max.assign(tf.reduce_max(data, axis=0))
-        self.min.assign(tf.reduce_min(data, axis=0))
-
-    def call(self, data: tf.Tensor) -> tf.Tensor:
-        """Scales the data to -1 and 1."""
-        scaled = (data - self.min) / (self.max - self.min)
-        return center_at_zero(scaled)
+def center_at_zero(value: tf.Tensor) -> tf.Tensor:
+    """Scale [0,1] to [-1,1]."""
+    return 2 * value - 1
 
 
 class KBitDiscretization(Discretization):
@@ -79,7 +38,11 @@ class KBitDiscretization(Discretization):
         ]
         one_hot = tf.reshape(one_hot, rank2_shape)
         signs = tf.where(data < 0, 1.0, 0.0)
-        result = center_at_zero(tf.concat([signs, one_hot], axis=1))
+        result = center_at_zero(
+            tf.concat(  # pylint: disable=no-value-for-parameter, unexpected-keyword-arg
+                [signs, one_hot], axis=1
+            )
+        )
         return result
 
     def get_config(self) -> dict:
