@@ -30,7 +30,7 @@ repos:
         types: [python]
         args:
           - "--disable=E0401,R0801,C0411,R0903"
-          - "--good-names=i,j,k,ex,Run,_,df,ax,fig,plt,x,y,f"
+          - "--good-names=i,j,k,ex,Run,_,df,ax,fig,plt,x,y,f,w,b"
           - "--max-line-length=88"
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
