@@ -4,6 +4,7 @@ import typing as t
 
 import keras
 import numpy as np
+import sklearn.neural_network
 from keras import layers
 
 
@@ -93,3 +94,58 @@ class KerasMLP(MLP):
     def get_weights(self) -> t.List[np.ndarray]:
         """Get the model weights."""
         return self.model.get_weights()
+
+
+class SklearnMLP(MLP):
+    """Sklearn MLP model for benchmarking."""
+
+    def __init__(self, inputs: int):
+        """Initialize SklearnMLP.
+
+        Args:
+            inputs: The number of inputs to the model.
+
+        """
+        super().__init__(inputs)
+        self._model = None
+
+    @property
+    def model(self) -> sklearn.neural_network.MLPRegressor:
+        """Get the model."""
+        if isinstance(self._model, sklearn.neural_network.MLPRegressor):
+            return self._model
+        raise ValueError("Model not initialized.")
+
+    def add(self, units: int):
+        """Add a dense layer to the model.
+
+        Args:
+            units: The number of neurons in the layer.
+
+        """
+        if self._model is None:
+            self._model = sklearn.neural_network.MLPRegressor(
+                hidden_layer_sizes=(units,),
+                activation="relu",
+                max_iter=1,
+                warm_start=True,
+            )
+        else:
+            self.model.hidden_layer_sizes += (units,)
+
+    def compile(self):
+        """Compile the model."""
+        self.model.fit(np.zeros((1, self.inputs)), np.zeros(1))
+        self.compiled = True
+
+    def call(self, inputs: np.ndarray) -> np.ndarray:
+        """Forward pass of the model."""
+        return self.model.predict(inputs)
+
+    def get_weights(self) -> t.List[np.ndarray]:
+        """Get the model weights."""
+        return self.model.coefs_ + self.model.intercepts_
+
+    def generate_inputs(self) -> np.ndarray:
+        """Generate random inputs for the model."""
+        return super().generate_inputs().reshape(1, -1)
