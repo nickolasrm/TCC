@@ -10,7 +10,7 @@ from omegaconf import DictConfig, OmegaConf
 
 import wandb
 from bnn_analysis import CONFIG_PATH, PACKAGE
-from bnn_analysis.utils import md5
+from bnn_analysis.utils import flatten_dict, md5
 
 Metrics = t.Optional[t.Dict[str, t.Any]]
 ExperimentFunc = t.Callable[[DictConfig], Metrics]
@@ -70,12 +70,19 @@ def _stop_wandb():
 def _log_agg_metrics(agg_metrics: t.Optional[t.Dict[str, t.Any]]):
     """Log a dictionary to wandb."""
     if isinstance(agg_metrics, dict):
-        for key, values in agg_metrics.items():
-            if isinstance(values, list):
-                for value in values:
-                    wandb.log({key: value})
-            else:
-                wandb.log({key: values})
+        agg_metrics = flatten_dict(agg_metrics)
+        list_like = set(
+            key for key, value in agg_metrics.items() if isinstance(value, list)
+        )
+        scalar_like = set(agg_metrics.keys()) - list_like
+        current = {key: agg_metrics[key] for key in scalar_like}
+        while list_like:
+            for key in list_like.copy():
+                current[key] = agg_metrics[key].pop(0)
+                if not agg_metrics[key]:
+                    list_like.remove(key)
+            wandb.log(current)
+            current = {}
     elif isinstance(agg_metrics, pd.DataFrame):
         wandb.log({"table": wandb.Table(dataframe=agg_metrics)})
 
