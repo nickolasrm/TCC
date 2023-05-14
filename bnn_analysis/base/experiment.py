@@ -47,7 +47,7 @@ def _configure_wandb(group: str, config: DictConfig, notes: t.Optional[str] = No
     name = config.name
     now = datetime.now().isoformat()
     config_md5 = md5(str(config))  # identifies the config
-    wandb.init(  # pylint: disable=no-member
+    wandb.init(
         project=PACKAGE,
         group=group,
         name=f"{name}-{now}",
@@ -64,17 +64,20 @@ def _configure_wandb(group: str, config: DictConfig, notes: t.Optional[str] = No
 
 def _stop_wandb():
     """Stop wandb."""
-    wandb.finish()  # pylint: disable=no-member
+    wandb.finish()
 
 
 def _log_agg_metrics(agg_metrics: t.Optional[t.Dict[str, t.Any]]):
     """Log a dictionary to wandb."""
     if isinstance(agg_metrics, dict):
-        wandb.log(agg_metrics)  # pylint: disable=no-member
+        for key, values in agg_metrics.items():
+            if isinstance(values, list):
+                for value in values:
+                    wandb.log({key: value})
+            else:
+                wandb.log({key: values})
     elif isinstance(agg_metrics, pd.DataFrame):
-        wandb.log(  # pylint: disable=no-member
-            {"table": wandb.Table(dataframe=agg_metrics)}  # pylint: disable=no-member
-        )
+        wandb.log({"table": wandb.Table(dataframe=agg_metrics)})
 
 
 def experiment(func: ExperimentFunc) -> MainFunc:
