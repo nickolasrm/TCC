@@ -1,2 +1,6 @@
+# ---
+# Chollet François. (2018). Deep learning with python. Manning Publications Co. 
+# ---
+
 defaults:
   - experiment: mnist/512

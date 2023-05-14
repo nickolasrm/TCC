@@ -1,2 +1,6 @@
+# ---
+# Sarab, Sura. (2019). Iris Flowers Classification Using Neural Network.
+# 10.13140/RG.2.2.21767.42403. 
+# ---
 defaults:
   - experiment: iris/4x4x4

@@ -1,2 +1,6 @@
+# ---
+# Compromise-free Bayesian Neural Networks - arxiv.org. (n.d.). Retrieved April 30,
+# 2023, from https://arxiv.org/pdf/2004.12211v1 
+# ---
 defaults:
   - experiment: housing/4x4x4x4
