@@ -8,7 +8,7 @@ import numpy as np
 from keras.layers import Layer
 from sklearn.metrics import classification_report
 
-from bnn_analysis.base.trainer import Trainer
+from bnn_analysis.base.trainer import KerasTrainer
 
 
 @dataclass
@@ -73,7 +73,7 @@ class KerasDataSet(SupervisedDataSet):
         super().__init__(*train_data, *test_data)
 
 
-class SupervisedTrainer(Trainer):
+class SupervisedTrainer(KerasTrainer):
     """Trains a keras model using its default fit method."""
 
     def __init__(self, dataset: SupervisedDataSet):
@@ -89,10 +89,18 @@ class SupervisedTrainer(Trainer):
     @property
     def input_shape(self) -> t.Tuple[int, ...]:
         """Return the input shape of the dataset."""
-        shape = self.dataset.x_shape
-        return shape[1:]
+        shape = tuple(self.dataset.x_shape[1:])
+        return shape
 
-    def fit(self, **kwargs):
+    @property
+    def output_shape(self) -> t.Tuple[int, ...]:
+        """Return the output shape of the dataset."""
+        if len(self.dataset.y_shape) == 1:
+            return (1,)
+        shape = tuple(self.dataset.y_shape[1:])
+        return shape
+
+    def _fit(self, **kwargs):
         """Train the model."""
         self.model.fit(
             self.dataset.x_train,

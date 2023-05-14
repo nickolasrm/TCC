@@ -13,7 +13,14 @@ def supervised_experiment(
     dataset: SupervisedDataSet,
     problem: t.Literal["classification", "regression"],
 ) -> MainFunc:
-    """Return a function that trains a model on a dataset."""
+    """Return a function that trains a model on a dataset.
+
+    Args:
+        name: Name of the experiment.
+        dataset: A supervised dataset.
+        problem: Type of the problem.
+
+    """
     # function generated for a supervised experiment
     def func(cfg: DictConfig) -> Metrics:
         layers = cfg.layers

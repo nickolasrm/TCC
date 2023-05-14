@@ -1,105 +1,129 @@
 """Base class for training Gym reinforcement environments."""
 import typing as t
+from dataclasses import dataclass, field
 
 import gym
 import numpy as np
-from keras import Model, Sequential
-from keras.layers import Input, Layer
-from pygad import GA, kerasga
+import torch
+from pygad import GA, torchga
+from torch import nn
 
+from bnn_analysis.base.experiment import Metrics
+from bnn_analysis.base.trainer import TorchTrainer
 from bnn_analysis.utils import get_logger
 
 Fitness = t.Callable[[np.ndarray, int], float]
 
 
-class KerasGymGA:
-    """Simplifies the genetic optimization with Keras models on Gym environments."""
+@dataclass
+class ReinforcementTrainer(TorchTrainer):
+    """Base class for reinforcement learning training."""
 
-    def __init__(
-        self,
-        env_id: str,
-    ):
-        """Initialize the class.
 
-        Args:
-            env_id: Gym environment ID.
+@dataclass
+class GATrainer(ReinforcementTrainer):
+    """Genetic algorithm trainer for reinforcement learning."""
 
-        """
-        self.env_id = env_id
-        self._model = None
+    fitness: Fitness
+    report: t.Dict[str, t.Any] = field(default_factory=dict, init=False)
 
-    def build(self, *layers: Layer, **kwargs):
-        """Build a Keras model from a list of layers.
-
-        This method will automatically add the input layer and compile the model.
-
-        Args:
-            layers: List of Keras layers.
-            **kwargs: Additional arguments to pass to the model's compile method.
-
-        """
-        # Getting the input and output sizes from the environment
-        env = self.env
-        input_size = env.observation_space.shape[0]  # type: ignore
-        output_size = env.action_space.n  # type: ignore
-
-        # Adding the input layer
-        model = Sequential()
-        model.add(Input(input_size))
-
-        # Checking if the last layer is the output layer
-        if layers[-1].units != output_size:
-            raise ValueError(
-                f"Environment expects {output_size} outputs, "
-                f"but the last layer has {layers[-1].units}"
-            )
-
-        # Adding layers
-        for layer in layers:
-            model.add(layer)
-        model.compile(**kwargs)
-
-        self._model = model
-
-    def fit(self, population_size: int = 10, **kwargs):
-        """Train a Keras model using a genetic algorithm.
-
-        Args:
-            population_size: Defaults to 10.
-            **kwargs: Additional arguments to pass to the genetic algorithm.
-
-        """
-        env = self.env
-        model = self.model
+    def _fit(self, population_size: t.Optional[int] = None, **kwargs: t.Any):
+        population_size = population_size or 10
+        hyperparameters = {
+            **dict(
+                num_generations=10,
+                num_parents_mating=10,
+                mutation_probability=0.1,
+            ),
+            **kwargs,
+        }
+        population = torchga.TorchGA(
+            model=self.model,
+            num_solutions=population_size,
+        )
         genetic = GA(
-            **{
-                "num_generations": 50,
-                "num_parents_mating": 5,
-                "on_generation": _callback_generation,
-                **kwargs,
-            },
-            initial_population=kerasga.KerasGA(
-                model, population_size
-            ).population_weights,
-            fitness_func=self._pygad_fitness(),
-            stop_criteria=f"reach_{env.spec.reward_threshold}",
+            fitness_func=self.fitness,
+            initial_population=population.population_weights,
+            keep_parents=-1,
+            on_generation=lambda x: self._callback_generation(  # pylint: disable=W0108
+                x
+            ),
+            **hyperparameters,
         )
         genetic.run()
-        _replace_weights(model, genetic.best_solution())
+        self._replace_weights(genetic.best_solution()[0])
 
-    def _pygad_fitness(self) -> Fitness:
+    def _replace_weights(self, solution: np.ndarray):
+        # Replace the weights of the model with the weights of the solution.
+        solution_weights = torchga.model_weights_as_dict(
+            model=self.model, weights_vector=solution
+        )
+        self.model.load_state_dict(solution_weights)
+
+    def _callback_generation(self, genetic: GA):
+        iteration = genetic.generations_completed
+        best_score = genetic.best_solution()[1]
+        mean_score = np.mean(genetic.last_generation_fitness)
+        std_score = np.std(genetic.last_generation_fitness)
+        get_logger().info(
+            {
+                "generation": iteration,
+                "best_fitness": best_score,
+                "mean_fitness": mean_score,
+                "std_fitness": std_score,
+            }
+        )
+        self.report.setdefault("best_fitness", []).append(best_score)
+        self.report.setdefault("avg_fitness", []).append(mean_score)
+        self.report.setdefault("std_fitness", []).append(std_score)
+
+    def evaluate(self) -> Metrics:
+        """Evaluate the model on the Gym environment."""
+        return self.report
+
+
+@dataclass
+class GymTrainer(GATrainer):
+    """Trainer for Gym environments."""
+
+    fitness: Fitness = field(init=False)
+    env_id: str
+
+    def __post_init__(self):
+        """Initialize the Gym environment."""
+        self.fitness = self._build_fitness()
+
+    @property
+    def input_shape(self) -> t.Tuple[int, ...]:
+        """Get the Gym environment input shape for the neural network."""
+        shape = self.env.observation_space.shape
+        if shape is None:
+            raise ValueError("Gym environment has no observation space.")
+        return shape
+
+    @property
+    def output_shape(self) -> t.Tuple[int, ...]:
+        """Get the Gym environment output shape for the neural network."""
+        outputs = self.env.action_space.n  # type: ignore
+        return (outputs,)
+
+    @property
+    def env(self) -> gym.Env:
+        """Get the Gym environment."""
+        return gym.make(self.env_id)
+
+    def _build_fitness(self) -> Fitness:
         # Generate a fitness function for a given environment and model.
 
         def fitness(solution: np.ndarray, _: t.Any) -> float:
-            model = self.model
-            _replace_weights(model, solution)
+            self._replace_weights(solution)
 
             env = self.env
             observation, _ = env.reset()
             reward_accumulator = 0.0
             finished = False
             while not finished:
-                action = _predict(self.model, observation)
+                action = self._predict(observation)
                 observation, reward, done, truncated, _ = env.step(action)
                 reward_accumulator += reward
                 finished = done or truncated
@@ -107,36 +131,37 @@ class KerasGymGA:
 
         return fitness
 
-    @property
-    def env(self) -> gym.Env:
-        """Get the Gym environment."""
-        return gym.make(self.env_id)
-
-    @property
-    def model(self) -> Model:
-        """Get the model if it has been built."""
-        if self._model is None:
-            raise ValueError("Model not built")
-        return self._model
+    def _predict(self, data: np.ndarray) -> int:
+        tensor = torch.tensor(data, dtype=torch.float)
+        predictions = self.model(tensor)
+        action = int(predictions.argmax())
+        return action
 
 
-def _predict(model: Model, data: np.ndarray) -> int:
-    predictions = model.predict(data.reshape(1, -1), verbose="0")
-    return np.argmax(predictions)  # type: ignore
+def train(
+    layers: t.List[nn.Module],
+    fit: t.Optional[dict] = None,
+    solver: t.Optional[t.Literal["gym"]] = None,
+    init: t.Optional[dict] = None,
+) -> Metrics:
+    """Trains a model using reinforcement learning.
 
+    Args:
+        layers: PyTorch layers of the model.
+        fit: Parameters for fitting the model.
+        solver: Name of the solver to use.
+        init: Parameters for initializing the trainer.
 
-def _replace_weights(model: Model, solution: np.ndarray):
-    # Replace the weights of the model with the weights of the solution.
-    solution_weights = kerasga.model_weights_as_matrix(
-        model=model, weights_vector=solution
-    )
-    model.set_weights(solution_weights)
+    Returns:
+        Training execution metrics
 
-
-def _callback_generation(genetic: GA):
-    get_logger().info(
-        {
-            "generation": genetic.generations_completed,
-            "fitness": genetic.best_solution()[1],
-        }
-    )
+    """
+    init, fit, solver = init or {}, fit or {}, solver or "gym"
+    if solver != "gym":
+        raise ValueError(f"Unknown solver {solver}")
+    cls = GymTrainer
+    trainer = cls(**init)
+    trainer.build(*layers)
+    trainer.fit(**fit)
+    report = trainer.evaluate()
+    return report

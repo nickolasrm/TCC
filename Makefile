@@ -39,11 +39,13 @@ lint-all:  ## Run linters on all files
 	@echo "Running linters on all files"
 	poetry run pre-commit run --all-files
 
-list:
+list:  ## List all experiments in the package
 	@echo "Listing experiments"
 	poetry run python -m bnn_analysis list
 
-run:
+run:  ## Run an experiment.
+##    Args: experiment=<experiment_name> [variant=<variant_name>]
+##    Example: `make run experiment=cartpole variant=nobias`
 	@echo "Running an experiment"
 	if [ -z "$(variant)" ]; then \
 		poetry run python -m bnn_analysis run $(experiment); \
@@ -51,7 +53,7 @@ run:
 		poetry run python -m bnn_analysis run $(experiment) --variant=$(variant); \
 	fi;
 
-run5:
+run5:  ## Run the same experiment 5 times.
 	@echo "Running an experiment"
 	if [ -z "$(variant)" ]; then \
 		poetry run python -m bnn_analysis run $(experiment) --repeat=5; \
@@ -59,6 +61,6 @@ run5:
 		poetry run python -m bnn_analysis run $(experiment) --repeat=5 --variant=$(variant); \
 	fi;
 
-jupyter:
+jupyter:  ## Open jupyter lab
 	@echo "Running jupyter"
 	poetry run jupyter lab --allow-root
