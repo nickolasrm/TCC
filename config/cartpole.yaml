@@ -1,0 +1,8 @@
+# ---
+# TheBojda (no date) Reinforcement learning on multiple cpus with genetic algorithm
+# using pygad, pytorch, open ai gym (CartPole) and multiprocessing.pool, Gist. 
+# Available at: https://gist.github.com/TheBojda/5f02f03a6c2aa28dcbd60a22b1d4ce7d
+# (Accessed: 13 May 2023). 
+# ---
+defaults:
+  - experiment: cartpole/16x16.yaml

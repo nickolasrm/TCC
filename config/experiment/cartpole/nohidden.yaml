@@ -1,0 +1,11 @@
+name: no_hidden_bias
+layers:
+  - _target_: torch.nn.Linear
+    in_features: 4
+    out_features: 2
+    bias: false
+  - _target_: torch.nn.ReLU
+fit:
+  num_generations: 50
+  num_parents_mating: 5
+  mutation_probability: 0.1

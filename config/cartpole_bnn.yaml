@@ -1,0 +1,2 @@
+defaults:
+  - experiment: cartpole_bnn/16x16.yaml
