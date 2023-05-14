@@ -1,0 +1,19 @@
+name: "no_hidden_bias"
+layers:
+  - _target_: bnn.layers.Linear
+    in_features: 8
+    out_features: 4
+    bias: false
+    bconfig:
+      _target_: bnn.bconfig.BConfig
+      activation_pre_process:
+        _target_: hydra.utils.get_class
+        path: bnn.ops.BasicInputBinarizer
+      weight_pre_process:
+        _target_: hydra.utils.get_class
+        path: bnn.ops.BasicInputBinarizer
+fit:
+  population_size: 80
+  num_generations: 150
+  num_parents_mating: 5
+  mutation_probability: 0.1

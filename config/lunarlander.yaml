@@ -1,0 +1,8 @@
+# ---
+# sh2439 (no date) Reinforcement-learning-pytorch/lunarlander-pytorch.ipynb at master · 
+# SH2439/reinforcement-learning-pytorch, GitHub. Available at:
+# https://github.com/sh2439/Reinforcement-Learning-Pytorch/blob/master/Lunar-Lander/LunarLander-Pytorch.ipynb
+# (Accessed: 13 May 2023). 
+# ---
+defaults:
+  - experiment: lunarlander/20.yaml
