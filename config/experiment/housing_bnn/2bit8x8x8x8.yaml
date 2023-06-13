@@ -42,5 +42,5 @@ compile:
     - mape
     - mae
 fit:
-  epochs: 500
+  epochs: 400
   batch_size: 32
