@@ -13,6 +13,6 @@ layers:
         _target_: hydra.utils.get_class
         path: bnn.ops.BasicInputBinarizer
 fit:
-  num_generations: 100
+  num_generations: 50
   num_parents_mating: 5
   mutation_probability: 0.1
